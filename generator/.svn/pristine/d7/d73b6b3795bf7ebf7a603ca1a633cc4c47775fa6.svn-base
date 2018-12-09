@@ -1,0 +1,64 @@
+package ${basePackage}.model;
+
+import java.io.Serializable;
+import java.util.Date;
+
+public class ${tableNameB} implements Serializable {
+    /**
+     *${tableNameB}
+     */
+    private static final long serialVersionUID = 1L;
+#foreach($columnObj in $columnObjs)
+#set($columnNameZH=${columnObj.columnComment})
+#if(!${columnObj.columnComment} || ""==${columnObj.columnComment})
+#set($columnNameZH=${columnObj.columnName})
+#end
+	 /**
+     * ${columnNameZH}
+     */
+    private ${columnObj.javaType} ${columnObj.columnName};
+#end
+#foreach($columnObj in $columnObjs)
+#set($columnNameZH=${columnObj.columnComment})
+#if(!${columnObj.columnComment} || ""==${columnObj.columnComment})
+#set($columnNameZH=${columnObj.columnName})
+#end
+	/**
+     * ${columnNameZH}
+     * @return ${columnObj.columnName} ${columnNameZH}
+     */
+    public ${columnObj.javaType} get${columnObj.columnNameA}() {
+        return ${columnObj.columnName};
+    }
+    /**
+     * ${columnNameZH}
+     */
+    public void set${columnObj.columnNameA}(${columnObj.javaType} ${columnObj.columnName}) {
+#if(${columnObj.javaType}=="java.util.String")
+        this.${columnObj.columnName} = ${columnObj.columnName} == null ? null : ${columnObj.columnName}.trim();
+#else
+		this.${columnObj.columnName} = ${columnObj.columnName};
+#end
+    }
+#end
+    /**
+     *
+     * @mbggenerated
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getClass().getSimpleName());
+        sb.append(" [");
+        sb.append("Hash = ").append(hashCode());
+#foreach($columnObj in $columnObjs)
+#set($columnNameZH=${columnObj.columnComment})
+#if(!${columnObj.columnComment} || ""==${columnObj.columnComment})
+#set($columnNameZH=${columnObj.columnName})
+#end
+		sb.append(", ${columnObj.columnName}(${columnNameZH})=").append(${columnObj.columnName});
+#end
+        sb.append("]");
+        return sb.toString();
+    }
+}

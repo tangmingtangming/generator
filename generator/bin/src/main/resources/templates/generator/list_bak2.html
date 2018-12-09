@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Table</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="plugins/bootstrap-table/css/bootstrap-table.min.css"/>
+    <link rel="stylesheet" href="css/layui.css" media="all"/>
+    <link rel="stylesheet" href="css/global.css" media="all">
+    <link rel="stylesheet" href="plugins/font-awesome/css/font-awesome.min.css">
+</head>
+
+<body>
+<div class="admin-main">
+    <form class="layui-form layui-form-pane" onsubmit="javascript:return false;">
+        <div class="layui-form-item" style="margin-bottom:0px;">
+            <label class="layui-form-label">表名</label>
+            <div class="layui-input-inline">
+                <input type="text" onchange="javascript:$('#btn_query').click();" class="layui-input" id="name">
+            </div>
+            <button class="layui-btn" id="btn_query">
+                查询
+            </button>
+
+            <button class="layui-btn" id="btn_gen">
+                <i class="layui-icon">&#xe654;</i>生成代码
+            </button>
+
+
+        </div>
+    </form>
+
+    <table id="generatorTable">
+
+    </table>
+
+</div>
+
+ <!-- 模态框（Modal） -->
+   <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" onclick="clearCache()" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">新增</h4>
+            </div>
+            <div class="modal-body">
+            
+	               <button class="layui-btn"  id="btn_cv">
+	                下一页
+	            </button>
+              	 <table id="columnTable">
+
+    			</table>
+    			
+              
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="plugins/jquery.min.js"></script>
+<script type="text/javascript" src="bootstrap.min.js"></script>
+<script type="text/javascript" src="plugins/bootstrap-table/bootstrap-table.min.js"></script>
+<script type="text/javascript" src="layui.js"></script>
+<script type="text/javascript" src="ag/generator/generator.js"></script>
+<script type="text/javascript" src="ag/generator/columnTable.js"></script>
+</body>
+<script type="text/javascript">
+	//添加：
+	$('#btn_gen').on("click", function () {
+		 if(generator.select()){
+	            var tableNames = "";
+	            for(var i=0;i<generator.currentItems.length;i++){
+	                tableNames+=generator.currentItems[i].tableName+",";
+	            }
+	            columnObj.init(tableNames.substring(0,tableNames.length-1));
+	            /* $.ajax({
+	                url: "/base/generator/getColumn",
+	                type: 'GET',
+	                data: json,
+	                cache: false,
+	                contentType:'application/json',
+	                success: function (data) {
+	                	debugger;
+	                	if(data.status == 200){
+	                		columns=data.data;
+	                	}
+	                		
+	                },
+	                error: function (jqXHR, textStatus, errorThrown) {
+	                    alert(jqXHR.responseText);
+	                }
+	            }); */
+	        } 
+	    //$('#myModal').modal();
+	      
+	    $('#myModal').modal({backdrop: 'static', keyboard: false});
+	});
+	
+	//添加：
+	$('#btn_cv').on("click", function () {
+		debugger;
+		 if(columnObj.select()){
+	          var dd = columnObj.currentItems;
+	          
+	        } 
+	    //$('#myModal').modal();
+	      
+	});
+
+</script>
+</html>

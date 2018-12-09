@@ -1,0 +1,31 @@
+package ${basePackage}.service;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import cn.aerotop.iplatform.common.util.PageCond;
+import cn.aerotop.iplatform.common.util.ResultUtil;
+import ${basePackage}.model.${tableNameB};
+
+public interface ${tableNameB}Service {
+	/**保存信息
+	 * @param ${tableNameB}
+	 */
+	void save${tableNameB}(${tableNameB} ${tableNameA});
+	/**查询信息
+	 * @param page
+	 * @param ${tableNameB}
+	 * @return
+	 */
+	HashMap<Object, Object> query${tableNameB}List(PageCond page ,List<Map> ${tableNameA}Critical);
+	/**删除信息
+	 * @param id
+	 */
+	void delete${tableNameB}s(String id);
+	/**根据id获取信息
+	 * @param id
+	 * @return
+	 */
+	ResultUtil get${tableNameB}(String id);
+}

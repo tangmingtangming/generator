@@ -1,0 +1,94 @@
+package ${basePackage}.controller;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import cn.aerotop.iplatform.common.util.JsonUtils;
+import cn.aerotop.iplatform.common.util.JsonXMLUtils;
+import cn.aerotop.iplatform.common.util.PageCond;
+import cn.aerotop.iplatform.common.util.ResultUtil;
+import cn.aerotop.iplatform.common.util.ToJsonUtils;
+import ${basePackage}.model.${tableNameB};
+import ${basePackage}.service.${tableNameB}Service;
+/**
+ * @author XEY
+ * 
+ *
+ */
+@Controller
+public class ${tableNameB}Controller {
+	@Autowired
+	private ${tableNameB}Service ${tableNameA}Service;
+	/**
+	 * @param models
+	 * @return
+	 */
+	@RequestMapping("/${tableNameA}/save${tableNameB}")
+	@ResponseBody
+	public ResultUtil save${tableNameB}( @RequestBody Map<String, Object> models) { 
+		${tableNameB} ${tableNameA}=null;
+		ResultUtil resultUtil;
+		try {
+			${tableNameA} = JsonXMLUtils.map2obj((Map<String, Object>)models.get("${tableNameA}"),${tableNameB}.class);
+			${tableNameA}Service.save${tableNameB}(${tableNameA});
+			resultUtil= ResultUtil.build(200, "保存成功");
+		} catch (Exception e) {
+			resultUtil= ResultUtil.build(500, "保存失败");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		return resultUtil;
+	 }
+	/**
+	 * @param page
+	 * @param ${tableNameA}
+	 * @return
+	 */
+	@RequestMapping("/${tableNameA}/query${tableNameB}List")
+	@ResponseBody
+	HashMap<Object, Object> query${tableNameB}List(PageCond page ,String ${tableNameA}Criticals){
+		List<Map> ${tableNameA}Critical = null;
+		if(${tableNameA}Criticals!=null){
+		  ${tableNameA}Critical = JsonUtils.jsonToList(${tableNameA}Criticals,Map.class);
+		}
+		HashMap<Object, Object> query${tableNameB}List = ${tableNameA}Service.query${tableNameB}List(page, ${tableNameA}Critical);
+		return query${tableNameB}List;
+	}
+	/**删除
+	 * @param models
+	 * @return
+	 */
+	@RequestMapping("/${tableNameA}/delete${tableNameB}s")
+	@ResponseBody
+	public ResultUtil delete${tableNameB}( @RequestBody Map<String, Object> models) {
+		 String ${pk.columnName}=(String) models.get("${pk.columnName}");
+		 try {
+			 ${tableNameA}Service.delete${tableNameB}s(${pk.columnName});
+			 return ResultUtil.build(200, "删除成功");
+		} catch (Exception e) {
+			return ResultUtil.build(200, "删除失败");
+		}
+	   }
+	
+	/**根据id获取信息
+	 * @param models
+	 * @return
+	 */
+	@RequestMapping("/${tableNameA}/get${tableNameB}")
+	@ResponseBody
+	public ResultUtil get${tableNameB}( @RequestBody Map<String, Object> models) {
+		 String ${pk.columnName}=(String) models.get("${pk.columnName}");
+		ResultUtil ${tableNameA} = ${tableNameA}Service.get${tableNameB}(${pk.columnName});
+	    return ${tableNameA};
+	}
+}
+

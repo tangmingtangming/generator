@@ -1,0 +1,113 @@
+package ${basePackage}.service.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Arrays;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+import cn.aerotop.iplatform.common.util.IAppConstants;
+import cn.aerotop.iplatform.common.util.IDUtils;
+import cn.aerotop.iplatform.common.util.PageCond;
+import cn.aerotop.iplatform.common.util.ResultUtil;
+import cn.aerotop.iplatform.common.util.ShiroUtils;
+import ${basePackage}.model.${tableNameB};
+import cn.aerotop.iplatform.common.util.CriticalUtil;
+import cn.aerotop.iplatform.common.util.CriticalUtil.Criteria;
+import ${basePackage}.service.${tableNameB}Service;
+import ${basePackage}.repository.${tableNameB}Mapper;
+@Service
+public class ${tableNameB}ServiceImpl implements ${tableNameB}Service {
+@Autowired
+private ${tableNameB}Mapper ${tableNameA}Mapper;
+	@Override
+	@Transactional
+	public void save${tableNameB}(${tableNameB} ${tableNameA}) {
+		//编辑
+		if (${tableNameA}.getId()!=null&&(!("".equals(${tableNameA}.getId())))&&${tableNameA}.getId().length() >0) {
+			${tableNameA}Mapper.updateByPrimaryKeySelective(${tableNameA});
+		}else {
+			//新增
+			String id =""+IDUtils.genItemId();
+			${tableNameB} selectByPrimaryKey = ${tableNameA}Mapper.selectByPrimaryKey(${tableNameA}.getId());
+			${tableNameA}.setId(id);
+			${tableNameA}Mapper.insertSelective(${tableNameA});
+		}
+
+	}
+
+	@Override
+	public HashMap<Object, Object> query${tableNameB}List(PageCond page, List<Map> ${tableNameA}Critical) {
+		// TODO Auto-generated method stub
+	   CriticalUtil criticalUtil = new CriticalUtil();
+	   CriticalUtil.Criteria criteria = criticalUtil.createCriteria();
+   	   String orderBy="";
+   	   if(${tableNameA}Critical!=null&&${tableNameA}Critical.size()!=0){
+   		   for(int i=0;i<${tableNameA}Critical.size();i++){
+   			   String property = (String)${tableNameA}Critical.get(i).get("property")==null?(String)${tableNameA}Critical.get(i).get("name"):(String)${tableNameA}Critical.get(i).get("property");
+   			    String value=(String)${tableNameA}Critical.get(i).get("value");
+   			   if(property==null||value==null||"".equals(value))continue;
+   			   if(${tableNameA}Critical.get(i).get("type")==null||!(${tableNameA}Critical.get(i).get("type").toString().indexOf("order")>=0)){
+   				   if("".equals(property)||"".equals((Object)${tableNameA}Critical.get(i).get("value"))){
+   					   continue;
+   				   }
+   				   String op=(String)${tableNameA}Critical.get(i).get("op");
+   				   if(op==null||"".equals(op)){
+   					   op=" = ";
+   					   criteria.forAll(property,op,(Object)${tableNameA}Critical.get(i).get("value"));
+   				   }else if(op.indexOf("between")>=0){
+   					 criteria.andColumnBetween(property, (String)${tableNameA}Critical.get(i).get("min"), (String)${tableNameA}Critical.get(i).get("max"));
+   				   }else if(op.indexOf("in")>=0){
+   					  List<String> l = Arrays.asList(((String)${tableNameA}Critical.get(i).get("value")).split(","));
+   					  criteria.andColumnIn(property, l); 
+   				   }else if(op.indexOf("in")>=0 && op.indexOf("not")>=0){
+					  List<String> l = Arrays.asList(((String)${tableNameA}Critical.get(i).get("value")).split(","));
+   					  criteria.andColumnNotIn(property, l); 
+   				   }else if(op.indexOf("like")>=0){
+   					 criteria.andColumnLike(property, "%"+(String)${tableNameA}Critical.get(i).get("value")+"%");
+   				   }else
+   					   criteria.forAll(property,op,(Object)${tableNameA}Critical.get(i).get("value"));
+   			   }else{
+   				   orderBy+=property+" "+(String)${tableNameA}Critical.get(i).get("ascOrDesc")+",";
+   			   }
+   		   }
+   		   if(!"".equals(orderBy))
+		   criticalUtil.setOrderByClause(orderBy.substring(0,orderBy.length()-1));
+   	   }
+		HashMap<Object, Object> hashMap = new HashMap<>();
+		 //将参数传给这个方法就可以实现物理分页了
+		PageHelper.startPage(page.getPageIndex(), page.getPageSize());
+		List<${tableNameB}> selectByExample = ${tableNameA}Mapper.selectByExample(criticalUtil);
+ 		PageInfo<${tableNameB}> pageInfo = new PageInfo<${tableNameB}>(selectByExample);
+  		hashMap.put("rows", selectByExample);
+		hashMap.put("total", pageInfo.getTotal());
+		return hashMap;
+	}
+
+	@Override
+	@Transactional
+	public void delete${tableNameB}s(String id) {
+		// TODO Auto-generated method stub
+		//获取需要删除的记录的id
+		String[] split = id.split(",");
+		for (String strId : split) {
+			${tableNameA}Mapper.deleteByPrimaryKey(strId);
+		}	
+	}
+
+	@Override
+	public ResultUtil get${tableNameB}(String id) {
+		// TODO Auto-generated method stub
+		${tableNameB} selectByPrimaryKey = ${tableNameA}Mapper.selectByPrimaryKey(id);
+		return ResultUtil.build(200, "查询成功", selectByPrimaryKey);
+	}
+}

@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Table</title>
+    <link rel="stylesheet" href="/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/plugins/bootstrap-table/css/bootstrap-table.min.css"/>
+    <link rel="stylesheet" href="/css/layui.css" media="all"/>
+    <link rel="stylesheet" href="/css/global.css" media="all">
+    <link rel="stylesheet" href="/plugins/font-awesome/css/font-awesome.min.css">
+    
+    
+     <link rel="stylesheet" href="/iTable/css/bootstrap-editable.css">
+    
+    
+    <style type="text/css">
+    	.bootstrap-table{
+    		height:100% !important;
+    	}
+    	.fixed-table-container{
+    		height:100% !important;
+    	}
+    	.fixed-table-body{
+    		height:100% !important;
+    	}
+    	/* .table table-hover table-striped{
+    		width:100% !important;
+    	} */
+    	
+    	tr > td{
+    		padding:0 0 !important;
+    		min-height:30px !important;
+    		line-height:30px !important;
+    	}
+    	/* .checkbox{
+    		margin:auto !important;
+    	}
+    	.fixed-table-header{
+    		width:100% !important;
+    	}
+    	.table{
+    		width:100% !important;
+    	}
+    	 .table-hover{
+    		width:100% !important;
+    	}
+    	 .table-striped{
+    		width:100% !important;
+    	} */
+    
+    
+    </style>
+</head>
+
+<body>
+<div class="admin-main">
+	<div style="height:40px">
+	    <form class="layui-form layui-form-pane" onsubmit="javascript:return false;">
+	        <div class="layui-form-item" style="margin-bottom:0px;">
+	            <div style="width:120px; float:left;">
+            		<button class="layui-btn" id="btn_last">
+		                <i class="layui-icon">&#xe654;</i> 上一步
+		            </button>
+		       </div>
+		       <div style="width:120px; float:right;">
+		           <button class="layui-btn" id="btn_next" style="margin-right:0px">
+		                <i class="layui-icon">&#xe654;</i> 下一步
+		            </button>
+		       </div>
+		       <div style="margin:auto;">
+		             <div id="itemTitle" style="margin:auto; text-align: center; font-size: large; font-weight: bold; line-height: 40px" >
+			            列表配置
+			       </div>
+		       </div>
+				  
+	            
+	
+	
+	        </div>
+	    </form>
+	</div>
+    <div style="height: 360px">
+		<div id="first" style="height: 100%">
+				
+		    <table id="columnTable"  style="height: 100%">
+		
+		    </table>
+		</div>
+		<div id="second"  style="height: 100%">	
+			
+		    <table id="authTable"  style="height: 100%">
+		
+		    </table>
+		</div>
+		<div id="third"  style="height: 100%">
+			
+		    <table id="formTable"  style="height: 100%">
+		
+		    </table>
+		  	 <div>
+		    基础路径：<input id="baseUrl" style="height:30px;width:90%" onchange="onbaseUrlChanged(this)" value="D:/workspace/springboot/frommayun/iplatform/src/main/java/cn/aerotop/iplatform/test"/>
+		    </div>
+		</div>
+		<div id="fourth"  style="height: 100%">
+			
+		    <table id="urlTable"  style="height: 100%">
+		
+		    </table>
+		      <div>
+		    基础包名：<input id="basePackage" style="height:30px;width:90%" onchange="onbaseChanged(this)"/>
+		    </div>
+		</div>
+	</div>
+</div>
+
+
+
+<script type="text/javascript" src="/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="/bootstrap.min.js"></script>
+<script type="text/javascript" src="/iTable/js/bootstrap-table.js"></script>
+<script type="text/javascript" src="/iTable/js/bootstrap-editable.min.js"></script>
+<script type="text/javascript" src="/iTable/js/bootstrap-table-editable.js"></script>
+<script type="text/javascript" src="/layui.js"></script>
+<script type="text/javascript" src="/ag/generator/columnTable.js"></script>
+<script type="text/javascript" src="/ag/generator/authTable.js"></script>
+<script type="text/javascript" src="/ag/generator/formTable.js"></script>
+<script type="text/javascript" src="/ag/generator/urlTable.js"></script>
+</body>
+<script type="text/javascript">
+	var datas={};
+	datas["baseUrl"]=$("#baseUrl").val();
+	if(datas["baseUrl"].indexOf("src/main/java")>=0){
+		datas["basePackage"]=datas["baseUrl"].substring(datas["baseUrl"].indexOf("src/main/java")+14,datas["baseUrl"].length);
+		var reg = new RegExp( '/' , "g" )
+		$("#basePackage").val(datas["basePackage"].replace(reg,"."));
+	}
+	function onbaseUrlChanged(e){
+		datas["baseUrl"]=e.value;
+		if(datas["baseUrl"].indexOf("src/main/java")>=0){
+			datas["basePackage"]=datas["baseUrl"].substring(datas["baseUrl"].indexOf("src/main/java")+14,datas["baseUrl"].length);
+			var reg = new RegExp( '/' , "g" )
+			$("#basePackage").val(datas["basePackage"].replace(reg,"."));
+		}
+		var pre=datas["baseUrl"];
+		var file=[tableName+".java",tableName+"Controller.java",tableName+"Service.java",tableName+"ServiceImpl.java",tableName+"Mapper.java",tableName+"Mapper.xml",tableName+"List.html"];
+		var vms=["template/Model.java.vm","template/Controller.java.vm","template/Service.java.vm","template/ServiceImpl.java.vm","template/Model.java.vm","template/Mapper.java.vm","template/Mapper.xml.vm","template/list.html.vm"];
+		rows=[];
+    	for(var i in file){
+    		var o={};
+			if(datas["baseUrl"].indexOf("src/main/java")>=0&&file[i].indexOf(".html")>=0){
+				pre=datas["baseUrl"].substring(0,datas["baseUrl"].indexOf("src/main/java"))+"src/main/resources/templates/";
+				pre+=datas["baseUrl"].substring(datas["baseUrl"].lastIndexOf("/")+1,datas["baseUrl"].length);
+			}
+    		o.fileName=file[i];
+    		o.vmFile=vms[i];
+    		o.fileUrl=pre+"/"+file[i];
+    		o.checked=true;
+    		rows[i]=o;
+    	}
+        
+		var opt = {
+		         silent: true,
+		         data: {
+		        	 "total": file.length,//总页数
+		             "rows": rows   //数据
+		         }
+		        };
+		//重新加载数据
+		$("#urlTable").bootstrapTable('refresh',opt);
+	}
+	function onbaseChanged(e){
+		datas["basePackage"]=e.value;
+	}
+	document.getElementById("second").style.display="none";
+	document.getElementById("third").style.display="none";
+	document.getElementById("fourth").style.display="none";
+	var index=1;
+	//下一步：
+	$('#btn_next').on("click", function () {
+		debugger;
+		if(index==1){
+			datas["columnObjs"]=columnObj.table.bootstrapTable('getData');
+			authObj.init(tableName);
+			document.getElementById("itemTitle").innerHTML="功能权限配置"
+			document.getElementById("first").style.display="none";
+			document.getElementById("second").style.display="";
+			document.getElementById("third").style.display="none";
+			document.getElementById("fourth").style.display="none";
+			index++;
+			return;
+		}else if(index==2){
+			datas["authObjs"]=authObj.table.bootstrapTable('getData');
+			formObj.init(tableName);
+			document.getElementById("itemTitle").innerHTML="表单配置"
+			document.getElementById("first").style.display="none";
+			document.getElementById("second").style.display="none";
+			document.getElementById("third").style.display="";
+			document.getElementById("fourth").style.display="none";
+			index++;
+			return;
+		}else if(index==3){
+			debugger;
+			datas["formObjs"]=formObj.table.bootstrapTable('getData');
+			urlObj.init(TableName);
+			document.getElementById("itemTitle").innerHTML="生成路径"
+			document.getElementById("first").style.display="none";
+			document.getElementById("second").style.display="none";
+			document.getElementById("third").style.display="none";
+			document.getElementById("fourth").style.display="";
+			index++;
+			return;
+		}
+		datas["urlObjs"]=urlObj.table.bootstrapTable('getAllSelections');
+		var json =  JSON.stringify(datas);
+		//json='{"tables":"aa"}';
+		debugger;
+		$.ajax({
+            url: "/base/generator/gen",
+            type: 'POST',
+            data: json,
+            dataType:"json",
+            cache: false,
+            contentType:'application/json',
+            success: function (data) {
+            	debugger;
+            	if(data.status == 200){
+            		columns=data.data;
+            	}
+            		
+            },
+            error: function (jqXHR, textStatus, errorThrown) {
+                alert(jqXHR.responseText);
+            }
+        });
+		
+		
+       
+	      
+	});
+	
+	$('#btn_last').on("click", function () {
+		if(index==4){
+			document.getElementById("itemTitle").innerHTML="表单配置"
+			document.getElementById("first").style.display="none";
+			document.getElementById("second").style.display="none";
+			document.getElementById("third").style.display="";
+			document.getElementById("fourth").style.display="none";
+			index--;
+		}else if(index==3){
+			document.getElementById("itemTitle").innerHTML="功能权限配置"
+			document.getElementById("first").style.display="none";
+			document.getElementById("second").style.display="";
+			document.getElementById("third").style.display="none";
+			document.getElementById("fourth").style.display="none";
+			index--;
+		}else if(index==2){
+			document.getElementById("itemTitle").innerHTML="列表配置"
+			document.getElementById("first").style.display="";
+			document.getElementById("second").style.display="none";
+			document.getElementById("third").style.display="none";
+			document.getElementById("fourth").style.display="none";
+			index--;
+		}
+		
+        var dd = columnObj.table.bootstrapTable('getData');
+        
+	});
+	
+	//克隆数据
+	function setData(data){
+		debugger;
+	      if(data){
+	    	  tableName=data.tableName;
+	    	  TableName=tableName.slice(0, 1).toUpperCase() + tableName.slice(1);
+	    	  datas["tableName"]=tableName;
+	    	  datas["tables"]=data.rows;
+	    	  columnObj.init(tableName);
+	    	//  authObj.init(tableName);
+			//	showZtree();
+	    } 
+	}
+</script>
+</html>

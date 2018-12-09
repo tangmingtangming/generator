@@ -1,0 +1,74 @@
+package ${basePackage}.repository;
+
+import ${basePackage}.model.${tableNameB};
+import cn.aerotop.iplatform.common.util.CriticalUtil;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+
+public interface ${tableNameB}Mapper {
+    /**
+     *
+     * @mbggenerated
+     */
+    int countByExample(CriticalUtil example);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int deleteByExample(CriticalUtil example);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int deleteByPrimaryKey(String id);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int insert(${tableNameB} record);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int insertSelective(${tableNameB} record);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    List<${tableNameB}> selectByExample(CriticalUtil example);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    ${tableNameB} selectByPrimaryKey(String id);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int updateByExampleSelective(@Param("record") ${tableNameB} record, @Param("example") CriticalUtil example);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int updateByExample(@Param("record") ${tableNameB} record, @Param("example") CriticalUtil example);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int updateByPrimaryKeySelective(${tableNameB} record);
+
+    /**
+     *
+     * @mbggenerated
+     */
+    int updateByPrimaryKey(${tableNameB} record);
+}

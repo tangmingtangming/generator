@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <script src="/iui.js"></script>
+  <title>Insert title here</title>
+</head>
+<body>
+	<div class="panel-body" style="padding-bottom:0px;">
+   		<form id="formSearch" class="form-inline">
+   		<!--隐藏字段-->
+#foreach($formObj in $formObjs)
+#if(${formObj.isShow} == false)
+       		<input id="${formObj.columnName}" name="${formObj.columnName}" type="hidden" class="form-control"/>
+#end
+#end
+			<div class="form-group">
+#foreach($columnObj in $columnObjs)
+#if(${columnObj.isQuery} == true)
+#set($columnNameZH=${columnObj.columnComment})
+#if(!${columnObj.columnComment} || ""==${columnObj.columnComment})
+#set($columnNameZH=${columnObj.columnName})
+#end
+				<div class="input-group">
+					<span class="input-group-addon" id="basic-${columnObj.columnName}" for="txt_search_${columnObj.columnName}">${columnNameZH}</span>
+					<input type="text" class="form-control" placeholder="${columnNameZH}" id="txt_search_${columnObj.columnName}" name="${columnObj.columnName}" aria-describedby="basic-${columnObj.columnName}">
+				</div> 
+#end
+#end
+				<button type="button" style="margin-left:50px" id="btn_query" class="btn btn-primary">
+					<span class="glyphicon glyphicon-search" aria-hidden="true">查询</span>
+				</button>
+			</div>
+        </form>
+        <!--按钮-->
+		<div id="toolbar" class="btn-group">
+#foreach($authObj in $authObjs)
+#if(${authObj.isShow} == false)
+			<button id="btn_${authObj.authKey}" type="button" class="btn btn-default" >
+			    <span class="glyphicon glyphicon-${authObj.authIcon}" aria-hidden="true"></span>${authObj.authName}
+			</button>
+#end
+#end
+        </div>
+	    <table id="$tableNameA" data-toggle="table"  data-url="/$tableNameA/query${tableNameB}List" 
+    		data-unique-id="id" data-pagination="true" 
+    		data-side-pagination="server" data-search="false" 
+    		data-toolbar="#toolbar" data-show-refresh="true" 
+    		data-show-columns="true" data-show-toggle="true" 
+    		data-striped="true" data-click-to-select="true" 
+    		style="table-layout:fixed;word-break:break-all; 
+    		word-wrap:break-all;">
+			<thead>
+		        <tr>
+		         	<th data-checkbox="true"></th>
+#foreach($columnObj in $columnObjs)
+#if(${columnObj.isShow} == true)
+#set($columnNameZH=${columnObj.columnComment})
+#if(!${columnObj.columnComment} || ""==${columnObj.columnComment})
+#set($columnNameZH=${columnObj.columnName})
+#end
+#if(${columnObj.javaType}=="java.util.Date")
+					<th data-field="${columnObj.columnName}" data-editable="${columnObj.isEdit}" data-formatter="dateformatter" data-formate="yyyy-MM-dd HH:mm:ss">${columnNameZH}</th>
+#else
+					<th data-field="${columnObj.columnName}" data-editable="${columnObj.isEdit}">${columnNameZH}</th>
+#end
+#end
+#end
+		        </tr>
+		    </thead>
+		</table>
+	</div> 
+ <!-- 新增编辑 -->
+ 	<div class="modal fade" id="myModal"  aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">新增</h4>
+            </div>
+            <div class="modal-body">
+                <form id="form1" method="post">
+#foreach($formObj in $formObjs)
+#if(${formObj.isShow}==false)
+				<input type="hidden" id="${formObj.columnName}" name="${formObj.columnName}" class="form-control"  placeholder="${columnNameZH}">
+#end
+#end
+#set($index=0)
+#foreach($formObj in $formObjs)
+#set($columnNameZH=${formObj.columnComment})
+#if(!${formObj.columnComment} || ""==${formObj.columnComment})
+#set($columnNameZH=${formObj.columnName})
+#end
+#if(${formObj.isShow} == true)
+#if($index%2==0)
+					<div class="row">
+#end
+						<div class="form-group col-sm-2 ">${columnNameZH}</div>
+						<div class="form-group col-sm-4 ">
+#if(${formObj.isDict} == true)
+							<select class="form-control"  name="${formObj.columnName}" id="form_${formObj.columnName}" placeholder="${columnNameZH}" ></select>
+#elseif(${formObj.javaType}=="java.util.Date") 
+							<input id="${formObj.columnName}"  type="text" class="layui-input form-control" name="${formObj.columnName}"  placeholder="${columnNameZH}"/>
+#else
+							<input type="text" id="${formObj.columnName}" name="${formObj.columnName}" class="form-control"  placeholder="${columnNameZH}"/>
+#end
+						</div>
+#if($index%2==1)
+					</div>
+#end
+#set($index=$index + 1)
+#end
+#end
+#if($index%2==1)
+					</div>
+#end
+	                <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>关闭</button>
+                        <button type="button" id="btn_submit" class="btn btn-primary" data-dismiss="modal" onclick="save()"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true" ></span>保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+	var Request = new Object();
+	Request = getUrlParam();
+#foreach($formObj in $formObjs)
+#if($formObj.isShow == false)
+    $('#$formObj.columnName').val(Request['$formObj.columnName']);
+#end
+#end
+    $('#$tableName').bootstrapTable('refresh');
+    //设置下拉框
+#foreach($formObj in $formObjs)
+#if(${formObj.isDict} == true)
+	$('#form_${formObj.columnName}').bootstrapSelect({
+      //data: null,
+      url: "/EosDict/queryDictById?id=DICT_${tableNameB}_${formObj.columnName}",
+      valueField: 'dictid',
+      textField: 'dictname',
+      showgroup:false
+	});
+#end
+#end
+#foreach($formObj in $formObjs)
+#if(${formObj.javaType} == "java.util.Date")
+	 //使用日期
+    laydate.render({
+        elem: '#${formObj.columnName}'
+        ,type: 'datetime'
+    });
+#end
+#end    
+   
+   //日期格式化展示
+    function dateformatter(value, row, index){
+   		return  new Date(value).format(this.formate);
+   	}
+
+	//查询btn_close
+    $(document).on('click', "#btn_query",function(){
+		var opt = {
+  	        url: "/${tableNameA}/query${tableNameB}List",
+  	        silent: true,
+  	        query:{
+  	        	"${tableNameA}Criticals":JSON.stringify(getSqlStatements())
+  	        }
+  	    };
+	    $('#${tableNameA}').bootstrapTable('refresh',opt);
+	});
+    var funcgroupName="";
+	
+	
+  	//添加：
+  	$('#btn_add').on("click", function () {
+		$('#myModal').modal();
+		$('#funcgroupid').val(funcgroupid);
+	});
+	//修改
+    $('#btn_edit').on("click", function () {
+        var row=$.map($("#$tableNameA").bootstrapTable('getSelections'),function(row){
+            return row ;
+        });
+        if(row.length==1){
+            //打开弹出框：
+            $('#myModal').modal();
+            var options = { jsonValue: row[0], isDebug: false };
+            $("#form1").initForm(options);
+        }
+    }); 
+	//删除
+    $('#btn_delete').on("click", function () {
+        var row=$.map($("#${tableNameA}").bootstrapTable('getSelections'),function(row){
+            return row ;
+        });
+        var ids="";
+        for (var i = 0; i < row.length; i++) {
+            //获取自定义table 的中的checkbox值
+            if(i == 0){
+            	ids += row[i].${pk.columnName};
+            }else{
+            	ids += ","+row[i].${pk.columnName};
+            }
+        }
+        if (row.length > 0) {
+        	 Ewin.confirm({ message: "确认要删除选择的数据吗？" }).on(function (e) {
+                 if (!e) {
+                     return;
+                 }
+            	 var json=JSON.stringify({id:ids});
+            	   $.ajax({
+                       type:"POST",
+                       url:"/${tableNameA}/delete${tableNameB}s",
+                       data:json,
+                       contentType:'application/json',
+                       success:function(msg){
+                    	   Ewin.alert(msg.msg);
+                               $('#${tableNameA}').bootstrapTable('refresh');
+                       },
+                          error: function () {
+                        	  Ewin.alert("删除失败");
+                        }
+                   });
+        	 });
+        } else {
+        	Ewin.alert("请选中一条记录");
+        }
+     
+    });
+	//提交添加：
+	function save(){
+		var strr= $('#form1').serializeArray();
+		var json={};
+		for(var i=0;i<strr.length;i++){
+			json[strr[i].name]=strr[i].value;
+		}
+	    //将对象转换成字符串
+	   // var str=JSON.stringify(aa);
+	    var str=JSON.stringify({${tableNameA}:json});
+	    $.ajax({
+	        type:"POST" ,
+	        url:"/${tableNameA}/save${tableNameB}",
+	        data:str,
+	        contentType:'application/json',
+	        success:function(msg){
+	        	if(msg.status == 200){
+	        		// 清空form表单 
+	        		document.getElementById("form1").reset();
+	        		$("#form1 input").val("");
+	        		 $('.selectpicker').selectpicker('val', '');
+	        		// 刷新table 
+	                $('#${tableNameA}').bootstrapTable('refresh');
+	                parent.refreshNode();
+	        		Ewin.alert('操作成功')
+	            }else{
+	            	Ewin.alert('操作失败');
+	            }
+	        }
+	    });
+	}  
+	  //接收参数
+    function getUrlParam() {
+ 	   var url = location.search; //获取url中"?"符后的字串   
+ 	   var theRequest = new Object();   
+ 	   if (url.indexOf("?") != -1) {   
+ 	      var str = url.substr(1);   
+ 	      strs = str.split("&");   
+ 	      for(var i = 0; i < strs.length; i ++) {   
+ 	         theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);   
+ 	      }   
+ 	   }   
+ 	   return theRequest;   
+    }
+    //接收参数
+    //2.property=value
+    //  property/op=between   in(值用逗号分隔)
+    //  property/min=0
+    //  property/max=10
+    //  order/property=asc
+    function getSqlStatements() {
+    	  debugger;
+    	var params = $('#formSearch').serializeArray();
+    	var paramsArray = [];
+    	var flag={};
+    	if(params==null||params=="")return;
+    	var temp={};
+    	for(var i=0;i<params.length;i++){
+    		if(params[i]["name"].indexOf("/")>=0){
+	    	   var ps = params[i]["name"].split("/");
+	    		if(ps.length==2){
+	    			if(ps[0].indexOf("order")>=0){
+	    				paramsArray.push({"type":"order","property":ps[1],"ascOrDesc":params[i]["value"]});
+	    			}else{
+	    				temp[ps[0]][ps[1]]=params[i]["value"];
+	    			}
+	    		}
+    		}else{
+    			temp[params[i]["name"]]=params[i];
+    		}
+    		
+    	}
+    	for(var key in temp){
+ 			paramsArray.push(temp[key]);
+    	}
+ 	   
+ 	   return paramsArray;   
+    }
+	</script>
+</body>
+</html>

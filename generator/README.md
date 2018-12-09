@@ -1,0 +1,2 @@
+# generator
+本系统主要用到的技术是springboot和mybatis，自动生成前后端的代码，前端的代码使用的bootstrap,后端生成pojo,service,controller层的代码，并允许自己指定包的位置，前后端一键生成节约开发的成本，将精力放在业务逻辑的开放上。

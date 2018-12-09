@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+  <script src="/iui.js"></script>
+  <title>Insert title here</title>
+</head>
+<body>
+	<div class="panel-body" style="padding-bottom:0px;">
+   		<form id="formSearch" class="form-inline">
+   		<!--隐藏字段-->
+		#foreach($formObj in $formObjs)
+		  #if(${formObj.isShow} == false)
+		  	<input id="${formObj.columnName}" name="${formObj.columnName}" type="hidden" class="form-control"/>
+		  #end
+		#end
+		<div class="form-group">
+		#foreach($culumnObj in $culumnObjs)
+		  #if(${culumnObj.isQuery} == false)
+		  	<div class="input-group">
+				<span class="input-group-addon" id="basic-${culumnObj.culumnName}" for="txt_search_${culumnObj.culumnName}">链路名称</span>
+				<input type="text" class="form-control" placeholder="${culumnObj.culumnName}" id="txt_search_${culumnObj.culumnName}" name="${culumnObj.culumnName}" aria-describedby="basic-${culumnObj.culumnName}">
+			</div> 
+		  #end
+		#end
+			<button type="button" style="margin-left:50px" id="btn_query" class="btn btn-primary">
+				<span class="glyphicon glyphicon-search" aria-hidden="true">查询</span>
+			</button>
+		</div>
+        </form>
+        <!--按钮-->
+		<div id="toolbar" class="btn-group">
+		#foreach($authObj in $authObjs)
+		  #if(${authObj.isShow} == false)
+		  	<button id="btn_${authObj.authKey}" type="button" class="btn btn-default" >
+                <span class="glyphicon glyphicon-${authObj.authIcon}" aria-hidden="true"></span>${authObj.authName}
+            </button>
+		  #end
+		#end
+        </div>
+	    <table id="$tableName" data-toggle="table"  data-url="/$tableName/query$tableName" 
+    		data-unique-id="id" data-pagination="true" 
+    		data-side-pagination="server" data-search="false" 
+    		data-toolbar="#toolbar" data-show-refresh="true" 
+    		data-show-columns="true" data-show-toggle="true" 
+    		data-striped="true" data-click-to-select="true" 
+    		style="table-layout:fixed;word-break:break-all; 
+    		word-wrap:break-all;">
+			<thead>
+		        <tr>
+		         	<th data-checkbox="true"></th>
+	         	#foreach($columnObj in $columnObjs)
+				  #if(${columnObj.isShow} == true)
+			      	<th data-field="${columnObj.columnName}" data-editable="${columnObj.isEdit}"
+			      	 #if($null.isNull($columnObj.renderer))
+			      	 renderer="renderer${columnObj.columnName}"
+					 #end
+			      	  >${columnObj.columnComment}</th>
+				  #end
+				#end
+		        </tr>
+		    </thead>
+		</table>
+	</div> 
+ <!-- 新增编辑 -->
+ 	<div class="modal fade" id="myModal"  aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                <h4 class="modal-title" id="myModalLabel">新增</h4>
+            </div>
+            <div class="modal-body">
+                <form id="form1" method="post">
+               #set($index=0)
+            	#foreach($formObj in $formObjs)
+            		#if($index%2==0)
+            			<div class="row">
+            		#end
+            		<div class="form-group col-sm-2 ">${formObj.columnName}</div>
+            		<div class="form-group col-sm-4 ">
+            			<input type="text" id="${formObj.columnName}" name="${formObj.columnName}" class="form-control"  placeholder="${formObj.columnName}">
+					</div>
+				  #set($index=$index++)
+				  	#if($index%2==1)
+            			</div>
+            		#end
+				#end
+	                <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span>关闭</button>
+                        <button type="button" id="btn_submit" class="btn btn-primary" data-dismiss="modal" onclick="save()"><span class="glyphicon glyphicon-floppy-disk" aria-hidden="true" ></span>保存</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+	var Request = new Object();
+	Request = getUrlParam();
+	#foreach($formObj in $formObjs)
+	  #if($formObj.isShow == false)
+	    $('#$formObj.columnName').val(Request['$formObj.columnName']);
+	  #end
+	#end
+   $('#$tableName').bootstrapTable('refresh');
+	   
+   //设置下拉框
+    var combo_protocoltype = [{"id":"yes","text":"是"},{"id":"no","text":"否"}];
+	$('#sel2').bootstrapSelect({
+      data: combo_protocoltype,
+      valueField: 'id',
+      textField: 'text',
+      showgroup:false
+	});
+	     $('#sel1').bootstrapSelect({
+	      url: "/EosDict/queryDictById?id=COF_YESORNO",
+	      valueField: 'dictid',
+	      textField: 'dictname',
+	      showgroup:false
+		}); 
+	   $('#sel3').bootstrapSelect({
+	  	      url: "/EosDict/queryDictById?id=COF_FUNCTYPE",
+	  	      valueField: 'dictid',
+	  	      textField: 'dictname',
+	  	      showgroup:false
+	  		});  
+	   var funcgroupName="";
+       //页面加载就执行查询所属的组织机构
+       $(document).ready(function(){
+            funcgroupName=getfuncgroup();
+       	});
+     //获取所属的功能组
+		function getfuncgroup(){
+			 var json=JSON.stringify({funcgroupid:funcgroupid});
+           $.ajax({
+               url: "/SysFuncgroup/getFuncGroup",
+               type: 'POST',
+               data: json,
+               async:false,
+               cache: false,
+               contentType:'application/json',
+               success: function (data) {
+               	if(data.status == 200){
+               		funcgroupName=data.data[0].fungroupname;
+               	}
+               		
+               },
+               error: function (jqXHR, textStatus, errorThrown) {
+                   alert(jqXHR.responseText);
+               }
+           });
+           return funcgroupName;
+		}
+		//显示所属的功能组
+	    function rendererfuncgroupid(e){
+	        return funcgroupName;
+	     }
+  //添加：
+      $('#btn_add').on("click", function () {
+        $('#myModal').modal();
+        $('#funcgroupid').val(funcgroupid);
+        
+    });
+     //修改
+    $('#btn_edit').on("click", function () {
+        var row=$.map($("#cusTable").bootstrapTable('getSelections'),function(row){
+            return row ;
+        });
+        if(row.length==1){
+                //打开弹出框：
+                $('#myModal').modal();
+                var options = { jsonValue: row[0], isDebug: false };
+                $("#form1").initForm(options);
+        }
+    }); 
+    
+  //删除
+    $('#btn_delete').on("click", function () {
+        var row=$.map($("#cusTable").bootstrapTable('getSelections'),function(row){
+            return row ;
+        });
+        var ids=[];
+        for (var i = 0; i < row.length; i++) {
+            //获取自定义table 的中的checkbox值
+            ids.push({realId:row[i].id,type:"function"}); //然后把单个id循环放到ids的数组中
+        }
+        if (row.length > 0) {
+        	 Ewin.confirm({ message: "确认要删除选择的数据吗？" }).on(function (e) {
+                 if (!e) {
+                     return;
+                 }
+            	 var json=JSON.stringify({sysApplication:ids});
+            	   $.ajax({
+                       type:"POST",
+                       url:"/SysApplication/deleteApplications",
+                       data:json,
+                       contentType:'application/json',
+                       success:function(msg){
+                    	   Ewin.alert(msg.msg);
+                               $('#cusTable').bootstrapTable('refresh');
+                    	   
+                       },
+                          error: function () {
+                        	  Ewin.alert("删除失败");
+                        }
+                   });
+        	 });
+        } else {
+        	Ewin.alert("请选中一条记录");
+        }
+     
+    });
+
+
+	//提交添加：
+	function save(){
+		var strr= $('#form1').serializeArray();
+		var json={};
+		for(var i=0;i<strr.length;i++){
+			json[strr[i].name]=strr[i].value;
+		}
+	    //将对象转换成字符串
+	   // var str=JSON.stringify(aa);
+	    var str=JSON.stringify({sysFunction:json});
+	    $.ajax({
+	        type:"POST" ,
+	        url:"/SysFunction/saveFunction",
+	        data:str,
+	        contentType:'application/json',
+	        success:function(msg){
+	        	if(msg.status == 200){
+	        		// 清空form表单 
+	        		document.getElementById("form1").reset();
+	        		$("#form1 input").val("");
+	        		 $('.selectpicker').selectpicker('val', '');
+	        		// 刷新table 
+	                $('#cusTable').bootstrapTable('refresh');
+	                parent.refreshNode();
+	        		Ewin.alert('操作成功')
+	            }else{
+	            	Ewin.alert('操作失败');
+	            }
+	
+	        }
+	    });
+	}  
+	  //接收参数
+    function getUrlParam() {
+ 	   var url = location.search; //获取url中"?"符后的字串   
+ 	   var theRequest = new Object();   
+ 	   if (url.indexOf("?") != -1) {   
+ 	      var str = url.substr(1);   
+ 	      strs = str.split("&");   
+ 	      for(var i = 0; i < strs.length; i ++) {   
+ 	         theRequest[strs[i].split("=")[0]]=unescape(strs[i].split("=")[1]);   
+ 	      }   
+ 	   }   
+ 	   return theRequest;   
+    }
+	</script>
+</body>
+</html>
